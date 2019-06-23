@@ -39,6 +39,13 @@ class Movie extends Component {
                 return <td key={Math.random()}>{element[property]}</td>;
               })}
               <td>
+                <i
+                  onClick={() => this.like(element._id)}
+                  class={this.getLikeStatus(element._id)}
+                  aria-hidden="true"
+                />
+              </td>
+              <td>
                 <button
                   className="btn btn-danger"
                   onClick={() => this.deleteMovie(element._id)}
@@ -53,6 +60,22 @@ class Movie extends Component {
     );
   }
 
+  getLikeStatus=(id)=>{
+    return this.state.movies.find((element) => element._id == id).like ? "fa fa-heart" : "fa fa-heart-o";
+  }
+
+  like = id => {
+    console.log("liked : ", id);
+    const movies = [...this.state.movies].map(element => {
+      if (element._id === id) {
+        !element.like?element.like =true:element.like=false;
+        return element;
+      }
+      return element;
+    });
+    this.setState({ movies });
+  };
+
   movieHeader() {
     return (
       <thead>
@@ -64,6 +87,7 @@ class Movie extends Component {
               </th>
             );
           })}
+          <th>Like</th>
           <th>Delete</th>
         </tr>
       </thead>
