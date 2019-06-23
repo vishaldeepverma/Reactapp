@@ -3,27 +3,30 @@ import { getMovies } from "../services/fakeMovieService";
 
 class Movie extends Component {
   state = {
-    tableHeader: ["_id", "title", "numberInStock", "dailyRentalRate"],
+    tableHeader: ["title", "numberInStock", "dailyRentalRate"],
     movies: getMovies()
   };
   render() {
+    if (this.state.movies.length === 0) return <h1>No Movies left</h1>;
     return (
-      <table className="table">
-        {this.movieHeader()}
-        <tbody>{this.getMovieData()}</tbody>
-      </table>
+      <React.Fragment>
+        <h1>Showing {this.state.movies.length} Movies</h1>
+        <table className="table">
+          {this.movieHeader()}
+          <tbody>{this.getMovieData()}</tbody>
+        </table>
+      </React.Fragment>
     );
   }
 
   deleteMovie = id => {
     console.log("deleted", id);
-    const movieList = [...this.state.movies];
-    const newMovieList = movieList.filter(element => {
+    const movies = this.state.movies.filter(element => {
       if (element._id === id) return;
       return element;
     });
 
-    this.setState({ movies: newMovieList });
+    this.setState({ movies });
   };
 
   getMovieData() {
