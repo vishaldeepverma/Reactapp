@@ -1,10 +1,15 @@
 import React, { Component } from "react";
+import PropTypes from "prop-types";
 import { getMovies } from "../services/fakeMovieService";
+import Pagination from "./pagination";
+import _ from "lodash";
 
 class Movie extends Component {
   state = {
     tableHeader: ["title", "numberInStock", "dailyRentalRate"],
-    movies: getMovies()
+    movies: getMovies(),
+    pageSize: 4,
+    currentPage: 1
   };
   render() {
     if (this.state.movies.length === 0) return <h1>No Movies left</h1>;
@@ -15,14 +20,28 @@ class Movie extends Component {
           {this.movieHeader()}
           <tbody>{this.getMovieData()}</tbody>
         </table>
+        <Pagination
+          itemCount={this.state.movies.length}
+          pageSize={this.state.pageSize}
+          pageChangeHandler={this.pageChangeHandler}
+        />
       </React.Fragment>
     );
   }
+  getData = () => {
+    return _.chunk(this.state.movies, this.state.pageSize)[
+      this.state.currentPage - 1
+    ];
+  };
+
+  pageChangeHandler = pageNumber => {
+    this.setState({ currentPage: pageNumber });
+  };
 
   deleteMovie = id => {
     console.log("deleted", id);
     const movies = this.state.movies.filter(element => {
-      if (element._id === id) return;
+      if (element._id === id) return null;
       return element;
     });
 
@@ -32,7 +51,7 @@ class Movie extends Component {
   getMovieData() {
     return (
       <React.Fragment>
-        {this.state.movies.map(element => {
+        {this.getData().map(element => {
           return (
             <tr key={element._id}>
               {this.state.tableHeader.map(property => {
@@ -41,7 +60,7 @@ class Movie extends Component {
               <td>
                 <i
                   onClick={() => this.like(element._id)}
-                  class={this.getLikeStatus(element._id)}
+                  className={this.getLikeStatus(element._id)}
                   aria-hidden="true"
                 />
               </td>
@@ -60,15 +79,17 @@ class Movie extends Component {
     );
   }
 
-  getLikeStatus=(id)=>{
-    return this.state.movies.find((element) => element._id == id).like ? "fa fa-heart" : "fa fa-heart-o";
-  }
+  getLikeStatus = id => {
+    return this.state.movies.find(element => element._id === id).like
+      ? "fa fa-heart"
+      : "fa fa-heart-o";
+  };
 
   like = id => {
     console.log("liked : ", id);
     const movies = [...this.state.movies].map(element => {
       if (element._id === id) {
-        !element.like?element.like =true:element.like=false;
+        !element.like ? (element.like = true) : (element.like = false);
         return element;
       }
       return element;
